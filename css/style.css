@@ -827,7 +827,7 @@ h1{
 }
 
 .white-blank{
-  /* filter: grayscale(100%); */
+  filter: grayscale(100%); 
 }
 
 .mb-5{
