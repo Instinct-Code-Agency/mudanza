@@ -1,0 +1,28 @@
+{
+  "hosting": {
+    "public": "public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "/Blog/Historia/**",
+        "destination": "/Blog/Historia/index.html"
+      },
+      {
+        "source": "/Blog/**",
+        "destination": "/Blog/index.html"
+      },
+      {
+        "source": "/Mudanzas/**",
+        "destination": "/Mudanzas/index.html"
+      },
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Disallow: firebase.html
+Sitemap: https://mudanzaslaesperanza.com/sitemap.xml

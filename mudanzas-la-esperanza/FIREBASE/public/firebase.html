@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Galería Santander</title>
+    <style>
+        .image_gallery {
+            width: 100%;
+            max-height: 90vh;
+            border: 4px solid grey;
+            border-radius: 22px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Imágenes de Santander</h1>
+    <div id="gallery"></div>
+
+    <script>
+        const cityName = "Laredo"; // Cambia esto por el nombre de la ciudad que quieras buscar
+        const galleryDiv = document.getElementById("gallery");
+
+        fetch("https://imagedeveloper.pythonanywhere.com/?city=" + cityName)
+        .then(res => res.json())
+        .then(result => {
+            console.log(result);
+            if(result.images && result.images.length > 0){
+                result.images.forEach(imageRef => {
+                    // Genera el endpoint que muestra la imagen real
+                    const imageUrl = "https://imagedeveloper.pythonanywhere.com/show_image/" + imageRef;
+                    
+                    const imgElement = document.createElement("img");
+                    imgElement.src = imageUrl;
+                    imgElement.alt = "Imagen de " + cityName;
+                    imgElement.className = "image_gallery";
+                    galleryDiv.appendChild(imgElement);
+                });
+            } else {
+                galleryDiv.innerHTML = "<p>No se encontraron imágenes para esta ciudad.</p>";
+            }
+        })
+        .catch(error => {
+            console.error("Error al cargar las imágenes:", error);
+            galleryDiv.innerHTML = "<p>Error al cargar las imágenes.</p>";
+        });
+    </script>
+
+</body>
+</html>
+
+<!--
+
+import json
+import pathlib
+from pathlib import Path
+from flask import Flask, Response, request
+from City import City
+import requests
+
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+import smtplib
+
+
+def file_put_contents(pathfile, strdata=""):
+    try:
+        with open(pathfile, 'w') as f:
+            f.write(strdata)
+    except IOError:
+        return f"no file found: {pathfile}"
+
+
+# AIzaSyD9XRpjaQtDLJLbrWajqIRuDSkCvo5HILg froxa
+# AIzaSyBzO6isnJCM1WBxLnL7BfzqFjsQq5T5CQs
+KEY_GOOGLE = 'AIzaSyBzO6isnJCM1WBxLnL7BfzqFjsQq5T5CQs'
+app        = Flask(__name__)
+
+
+@app.after_request
+def after_request(response):
+    response.headers.set('Access-Control-Allow-Origin', '*')
+    return response
+
+
+@app.route('/test')
+def test():
+    city     = request.args.get('city').strip().lower().replace(' ', '+').replace('++', '+')
+    newClass = City()
+    resultData = newClass.existThisCity(city)
+    if resultData == "false":
+        return Response(response=resultData, mimetype='text/html')
+    else:
+        return Response(response=resultData, mimetype='text/html')
+
+
+@app.route("/")
+def index():
+    pathlib.Path('storage').mkdir(parents=True, exist_ok=True)
+    city       = request.args.get('city').strip().lower().replace(' ', '+').replace('++', '+')
+    city_url   = 'storage/'+city+'.json'
+    city_url   = city_url.replace('+', '')
+
+    my_file = Path(city_url)
+    if my_file.exists():
+        fileA = open(city_url, "r")
+        dataA = fileA.read()
+        return Response(response=dataA, mimetype='application/json')
+
+    newClass = City()
+    resultData = newClass.existThisCity(city)
+    # if resultData == "false":
+    #    return Response(response=resultData, mimetype='text/html')
+
+    result     = requests.get('https://maps.googleapis.com/maps/api/geocode/json?address=Spain+'+city+'&key='+KEY_GOOGLE)
+    parsed     = json.loads(result.content)
+    PLACE_ID   = parsed["results"][0]["place_id"]
+    res_images = requests.get('https://maps.googleapis.com/maps/api/place/details/json?place_id='+PLACE_ID+'&radius=10000&key='+KEY_GOOGLE)
+    parsed_img = json.loads(res_images.content)
+    parsed_img = parsed_img["result"]["photos"]
+
+    list_img   = []
+
+    for object_image in parsed_img:
+        img_ref  = object_image["photo_reference"]
+        list_img.append(img_ref)
+
+    file_put_contents(city_url, json.dumps({"images": list_img}))
+    fileA = open(city_url, "r")
+    dataA = fileA.read()
+    return Response(response=dataA, mimetype='application/json')
+
+
+@app.route("/show_image/<string:img_ref>/")
+def show_image(img_ref):
+    img_link = 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=99999&photo_reference='+img_ref+'&key='+KEY_GOOGLE
+    img_content = requests.get(img_link)
+    return Response(img_content.content, mimetype='image/jpeg')
+
+
+
+
+# send mi email
+@app.route("/email/send/")
+def send_email():
+    mi_ip = request.environ.get("HTTP_X_FORWARDED_FOR", request.remote_addr)
+    sender_email   = "xboss.developer@gmail.com"
+    receiver_email = "xboss.developer@gmail.com"
+    password       = "doneqrmjfhbxlpwv"
+
+    message            = MIMEMultipart("alternative")
+    message["From"]    = sender_email
+    message["To"]      = receiver_email
+    text               = mi_ip
+
+    ipR = None
+    try:
+        ipR = requests.get('https://api.ipgeolocation.io/ipgeo?apiKey=f9dd9c2cea00459bb251f3ea4bb22d19&ip='+mi_ip)
+        ipR = ipR.json()
+        ipR = ipR['ip']+" "+ipR['continent_name']+" "+ipR['country_name']+" "+ipR['city']
+        text = ipR
+        message["Subject"] = ipR
+    except:
+        message["Subject"] = ip_address+' '+hostname
+
+    part1 = MIMEText(text, "plain")
+    message.attach(part1)
+
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+        server.login(sender_email, password)
+        server.sendmail( sender_email, receiver_email, message.as_string())
+        server.quit()
+        return Response(response=mi_ip, mimetype='text/html')
+
+
+
+@app.route("/hola/io/")
+def mi_ia():
+    mi_ip = 'hola hola'
+    return Response(response=mi_ip, mimetype='text/html')
+
+
+
+
+"""
+user_: imagedeveloper
+email: xboss.developer@gmail.com
+pass : svob
+"""
+
+
+-->
