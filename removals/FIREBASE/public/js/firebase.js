@@ -34,7 +34,7 @@ let firebaseConfigInstinct = {
 
   // Aumentar visitas únicas en Firestore
   function contarVisitaUnica() {
-    // if (localStorage.getItem('counted')) return mostrarUnicas();
+    if (localStorage.getItem('counted')) return mostrarUnicas();
     
     const metaRef = dbFB.collection('stats').doc('metadata');
     metaRef.get().then(doc => {
