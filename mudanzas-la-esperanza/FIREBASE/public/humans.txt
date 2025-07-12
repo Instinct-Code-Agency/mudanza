@@ -1,9 +1,0 @@
-/* TEAM */
-Developer: Alexander Gutierrez
-Contact: instinct.code.agency@gmail.com
-From: Cabezon de La Sal, España
-
-/* SITE */
-Last update: 2025-07-03
-Standards: HTML5, CSS3
-Software: WordPress
