@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Disallow: /README.md
+Sitemap: https://mudanzaslaesperanza.com/sitemap.xml
