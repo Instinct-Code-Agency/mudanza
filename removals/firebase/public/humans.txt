@@ -1,7 +1,7 @@
 /* TEAM */
-Developer: Alexander Gutierrez
+Developer: Guti Gutierrez
 Contact: instinct.code.agency@gmail.com
-From: Cabezon de La Sal, España
+From: Bilbo, Euskadi
 
 /* SITE */
 Last update: 2025-07-03
